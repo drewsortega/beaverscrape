@@ -4,6 +4,19 @@ import permutations
 import multiprocessing as mp
 import csv
 from bs4 import BeautifulSoup
+from threading import Thread
+from collections import deque
+
+done = False
+
+def write_file(filepath, q):
+    f = open(filepath):
+        while(!done):
+            if(len(q) > 0):
+                f.write(q.pop_left())
+
+
+q = deque()
 def parse_url(path):
     url = "https://beav.es/{}".format(path)
     title = ""
@@ -25,11 +38,16 @@ if __name__ == '__main__':
     perms = list(map(lambda s: 'Z' + s, perms))
     # print("Parsing {} URLs.".format(len(perms)))
  
+    tr = Thread(write_file, args=("beaves_out.csv", q)) 
+    tr.start()
 
     pool = mp.Pool(mp.cpu_count())
 
     pool.map(parse_url, [path for path in perms])
 
     pool.close()
+    done = True
+    tr.join()
+
 
     # print("Done! wrote output to beaves_out.csv")
